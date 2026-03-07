@@ -1,0 +1,38 @@
+# Binary
+smelt
+
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go workspace
+go.work
+go.work.sum
+
+# Dependency cache
+vendor/
+
+# Test/debug temp files
+/tmp/
+testdata/*.pdf
+testdata/*.json
+testdata/*.csv
+
+# Editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Config with secrets
+.env
+~/.smelt/
+
+# Claude Code
+.claude/

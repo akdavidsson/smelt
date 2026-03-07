@@ -121,6 +121,11 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(regions) == 0 {
+		if isJSRendered(inputData) {
+			return fmt.Errorf("no extractable regions found: page appears to be JavaScript-rendered (React/Next.js)\n" +
+				"  The table data is loaded client-side and not present in the initial HTML.\n" +
+				"  Try finding the underlying data URL (e.g. an API endpoint) instead.")
+		}
 		return fmt.Errorf("no extractable regions found in input")
 	}
 
@@ -334,4 +339,15 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// isJSRendered returns true when the HTML looks like a client-side SPA
+// where table data is loaded dynamically by JavaScript.
+func isJSRendered(data []byte) bool {
+	s := strings.ToLower(string(data[:min(8192, len(data))]))
+	return strings.Contains(s, `id="__next_data__"`) ||
+		strings.Contains(s, `id="__next"`) ||
+		strings.Contains(s, `data-reactroot`) ||
+		strings.Contains(s, `window.__react`) ||
+		strings.Contains(s, `__next_data__`)
 }

@@ -9,7 +9,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/launcher"
+	"github.com/go-rod/rod/lib/proto"
 	"github.com/spf13/cobra"
 
 	"github.com/akdavidsson/smelt/internal/capture"
@@ -28,8 +32,10 @@ var (
 	flagModel   string
 	flagRaw     bool
 	flagVerbose bool
-	flagTable   int
-	flagAll     bool
+	flagTable    int
+	flagAll      bool
+	flagHeadless bool
+	flagWait     int
 )
 
 var rootCmd = &cobra.Command{
@@ -54,6 +60,8 @@ func init() {
 	rootCmd.Flags().BoolVarP(&flagVerbose, "verbose", "v", false, "enable verbose logging")
 	rootCmd.Flags().IntVar(&flagTable, "table", 0, "select Nth table (1-based); 0 = auto-select")
 	rootCmd.Flags().BoolVar(&flagAll, "all", false, "extract all tables and output as JSON array")
+	rootCmd.Flags().BoolVar(&flagHeadless, "headless", false, "fetch URLs using a headless Chromium browser (handles JS-rendered pages)")
+	rootCmd.Flags().IntVar(&flagWait, "wait", 0, "extra seconds to wait after page load (use with --headless for slow SPAs)")
 }
 
 // Execute runs the root command.
@@ -86,7 +94,11 @@ func run(cmd *cobra.Command, args []string) error {
 	} else {
 		inputName = args[0]
 		if strings.HasPrefix(inputName, "http://") || strings.HasPrefix(inputName, "https://") {
-			inputData, err = fetchURL(inputName)
+			if flagHeadless {
+				inputData, err = fetchURLHeadless(inputName)
+			} else {
+				inputData, err = fetchURL(inputName)
+			}
 			if err != nil {
 				return fmt.Errorf("fetching %s: %w", inputName, err)
 			}
@@ -217,6 +229,42 @@ func fetchURL(url string) ([]byte, error) {
 		return nil, fmt.Errorf("HTTP %d", resp.StatusCode)
 	}
 	return io.ReadAll(resp.Body)
+}
+
+// fetchURLHeadless fetches a URL using a headless Chromium browser, waiting
+// for JavaScript to finish rendering before returning the page HTML.
+// rod will auto-download Chromium if it is not already installed.
+func fetchURLHeadless(rawURL string) ([]byte, error) {
+	u, err := launcher.New().Headless(true).Launch()
+	if err != nil {
+		return nil, fmt.Errorf("launching browser: %w", err)
+	}
+
+	browser := rod.New().ControlURL(u).MustConnect()
+	defer browser.MustClose()
+
+	page, err := browser.Page(proto.TargetCreateTarget{URL: rawURL})
+	if err != nil {
+		return nil, fmt.Errorf("opening page: %w", err)
+	}
+	defer page.Close()
+
+	// Wait up to 30s for JS to finish rendering.
+	if err := page.WaitIdle(30 * time.Second); err != nil {
+		// Timeout is non-fatal — use whatever the page rendered so far.
+		fmt.Fprintln(os.Stderr, "warning: page idle timeout, using partial render")
+	}
+
+	// Optional extra wait for SPAs that load data after idle.
+	if flagWait > 0 {
+		time.Sleep(time.Duration(flagWait) * time.Second)
+	}
+
+	html, err := page.HTML()
+	if err != nil {
+		return nil, fmt.Errorf("getting rendered HTML: %w", err)
+	}
+	return []byte(html), nil
 }
 
 // detectInputType returns "pdf", "html", or "unknown".

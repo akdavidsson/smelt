@@ -72,6 +72,12 @@ curl -s https://example.com/data.html | smelt --format csv
 
 # Use a specific model
 smelt data.html --model claude-opus-4-6
+
+# JavaScript-rendered pages (React, Next.js, etc.)
+smelt https://www.transfermarkt.com/premier-league/tabelle/wettbewerb/GB1 --headless
+
+# Extra wait for slow SPAs that load data after idle
+smelt https://example.com/spa --headless --wait 5
 ```
 
 ---
@@ -88,6 +94,8 @@ smelt data.html --model claude-opus-4-6
 | `--schema` | | | Print the inferred schema as JSON and exit |
 | `--raw` | | | Print extracted regions to stderr and exit (no API key required) |
 | `--model` | | `claude-sonnet-4-6` | Anthropic model to use (overrides config) |
+| `--headless` | | | Fetch URL using headless Chromium (handles JS-rendered pages); auto-downloads Chromium if not present |
+| `--wait` | | `0` | Extra seconds to wait after page idle, for SPAs with slow async loading (use with `--headless`) |
 | `--verbose` | `-v` | | Enable verbose logging to stderr |
 | `--ocr` | | | Enable OCR (not yet implemented) |
 
@@ -174,6 +182,26 @@ smelt report.html --all
   }
 ]
 ```
+
+### JavaScript-rendered pages
+
+Many modern sites (React, Next.js, Vue, etc.) load their table data client-side via JavaScript. A plain HTTP fetch returns an empty shell with no table content.
+
+Use `--headless` to launch a real Chromium browser, execute the JavaScript, and return the fully rendered HTML:
+
+```bash
+smelt https://www.transfermarkt.com/premier-league/tabelle/wettbewerb/GB1 --headless
+```
+
+Chromium is auto-downloaded to `~/.cache/rod/` on first use if not already installed.
+
+For SPAs that continue loading data after the initial idle signal, add `--wait N`:
+
+```bash
+smelt https://example.com/dashboard --headless --wait 5
+```
+
+Note: some sites actively detect and block headless browsers. In those cases smelt will still find any data embedded in the page's initial HTML (e.g. Next.js `__NEXT_DATA__` JSON), but fully dynamic content cannot be retrieved without a real browser session.
 
 ### Query-guided selection
 

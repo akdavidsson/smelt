@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/arnordavidsson/smelt/internal/extract"
+	"github.com/akdavidsson/smelt/internal/extract"
 )
 
 // WriteCSV writes the extraction result as CSV with a header row.

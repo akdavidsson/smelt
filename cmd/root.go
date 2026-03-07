@@ -12,11 +12,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/arnordavidsson/smelt/internal/capture"
-	"github.com/arnordavidsson/smelt/internal/config"
-	"github.com/arnordavidsson/smelt/internal/extract"
-	"github.com/arnordavidsson/smelt/internal/output"
-	"github.com/arnordavidsson/smelt/internal/schema"
+	"github.com/akdavidsson/smelt/internal/capture"
+	"github.com/akdavidsson/smelt/internal/config"
+	"github.com/akdavidsson/smelt/internal/extract"
+	"github.com/akdavidsson/smelt/internal/output"
+	"github.com/akdavidsson/smelt/internal/schema"
 )
 
 var (
@@ -201,7 +201,7 @@ func fetchURL(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; smelt/1.0; +https://github.com/arnordavidsson/smelt)")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; smelt/1.0; +https://github.com/akdavidsson/smelt)")
 	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

@@ -1,4 +1,4 @@
-module github.com/arnordavidsson/smelt
+module github.com/akdavidsson/smelt
 
 go 1.24.0
 

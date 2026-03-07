@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/arnordavidsson/smelt/internal/capture"
-	"github.com/arnordavidsson/smelt/internal/schema"
+	"github.com/akdavidsson/smelt/internal/capture"
+	"github.com/akdavidsson/smelt/internal/schema"
 )
 
 // ── coerceValue ──────────────────────────────────────────────────────────────

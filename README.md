@@ -11,13 +11,13 @@ smelt captures tables from any document, uses the Anthropic API to infer a typed
 ## Install
 
 ```bash
-go install github.com/arnordavidsson/smelt@latest
+go install github.com/akdavidsson/smelt@latest
 ```
 
 Or build from source:
 
 ```bash
-git clone https://github.com/arnordavidsson/smelt
+git clone https://github.com/akdavidsson/smelt
 cd smelt
 go build -o smelt .
 ```

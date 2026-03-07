@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/arnordavidsson/smelt/internal/extract"
+	"github.com/akdavidsson/smelt/internal/extract"
 )
 
 // WriteJSON writes the extraction result as indented JSON.

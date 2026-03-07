@@ -1,3 +1,5 @@
+![smelt](img/logo.png)
+
 # smelt
 
 Extract structured data from PDFs, HTML files, and URLs into JSON or CSV.
